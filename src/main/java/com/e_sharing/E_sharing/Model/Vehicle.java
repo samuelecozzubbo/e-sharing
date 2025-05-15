@@ -17,7 +17,7 @@ public class Vehicle {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "site_id")
+    @JoinColumn(name = "Site_id")
     private Site site;
 
     //Costruttori

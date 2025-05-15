@@ -1,15 +1,13 @@
 package com.e_sharing.E_sharing.Model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 
 import java.util.List;
 
 @Entity
-@Table(name = "user")
-public class User {
+@Table(name = "user_account")
+public class UserAccount {
     @Id
-    @Email(message = "Email non valida", regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
     private String email;
     private String nome;
     private String cognome;
@@ -18,12 +16,12 @@ public class User {
 
     //Relazione con tabella lead
     // Relazione con la tabella pivot (Table)
-    @OneToMany(mappedBy = "user",cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(mappedBy = "userAccount",cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<Lead> leads;
 
     //Costruttori
-    public User() {}
-    public User(String email, String nome, String cognome, String username, String password) {
+    public UserAccount() {}
+    public UserAccount(String email, String nome, String cognome, String username, String password) {
         this.email = email;
         this.nome = nome;
         this.cognome = cognome;

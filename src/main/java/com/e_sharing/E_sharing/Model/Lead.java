@@ -17,9 +17,9 @@ public class Lead {
 
     //Relazioni con utente
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "Utente_email")
+    @JoinColumn(name = "email")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    private UserAccount userAccount;
     //Relazioni con pivot
 
     //Costruttori
@@ -50,10 +50,10 @@ public class Lead {
     public void setSconto(int sconto) {
         this.sconto = sconto;
     }
-    public User getUser() {
-        return user;
+    public UserAccount getUser() {
+        return userAccount;
     }
-    public void setUser(User user) {
-        this.user = user;
+    public void setUser(UserAccount userAccount) {
+        this.userAccount = userAccount;
     }
 }
