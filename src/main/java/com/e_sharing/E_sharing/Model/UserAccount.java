@@ -1,6 +1,9 @@
 package com.e_sharing.E_sharing.Model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -8,10 +11,27 @@ import java.util.List;
 @Table(name = "user_account")
 public class UserAccount {
     @Id
+    @Email(message = "Email non valida")
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
+
+    @NotBlank(message = "Il nome è obbligatorio")
+    @Size(max = 50)
+    @Column(nullable = false)
     private String nome;
+
+    @NotBlank(message = "Il cognome è obbligatorio")
+    @Size(max = 50)
+    @Column(nullable = false)
     private String cognome;
+
+    @NotBlank(message = "Lo username è obbligatorio")
+    @Size(min = 3, max = 30)
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @NotBlank(message = "La password è obbligatoria")
+    @Column(nullable = false)
     private String password;
 
     //Relazione con tabella lead

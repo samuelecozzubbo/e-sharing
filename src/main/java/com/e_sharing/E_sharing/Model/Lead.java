@@ -1,6 +1,7 @@
 package com.e_sharing.E_sharing.Model;
 import com.e_sharing.E_sharing.Enum.LeadState;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import java.time.LocalDate;
@@ -12,13 +13,22 @@ public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @NotNull(message = "La data di acquisto è obbligatoria")
+    @Column(nullable = false)
     private LocalDate dataAcquisto;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Lo stato è obbligatorio")
+    @Column(nullable = false)
     private LeadState status;
+
+    @Column(nullable = false)
     private int sconto;
 
-    //Relazioni con utente
-    @ManyToOne
-    @JoinColumn(name = "user_account_email", referencedColumnName = "email")
+    // Relazione con Utente
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_account_email", referencedColumnName = "email", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount userAccount;
 
