@@ -1,12 +1,12 @@
 package com.e_sharing.E_sharing.Model;
-
 import com.e_sharing.E_sharing.Enum.LeadState;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "lead")
 public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -20,6 +20,7 @@ public class Lead {
     @JoinColumn(name = "Utente_email")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
+    //Relazioni con pivot
 
     //Costruttori
     public Lead() {}
