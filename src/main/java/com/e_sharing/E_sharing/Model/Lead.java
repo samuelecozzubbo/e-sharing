@@ -22,9 +22,6 @@ public class Lead {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount userAccount;
 
-    //Relazioni con LeadVehicle
-    @OneToMany(mappedBy = "lead")
-    private List<LeadVehicle> leadVehicles;
 
     //Costruttori
     public Lead() {}

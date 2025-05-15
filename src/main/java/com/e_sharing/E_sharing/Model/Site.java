@@ -15,9 +15,6 @@ public class Site {
     private String address;
     private Integer capacity;
 
-    @OneToMany(mappedBy = "site")
-    private List<Vehicle> vehicles;
-
     //Constructor
     public Site() {}
 

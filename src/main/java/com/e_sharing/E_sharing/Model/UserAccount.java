@@ -16,8 +16,6 @@ public class UserAccount {
 
     //Relazione con tabella lead
     // Relazione con la tabella pivot (Table)
-    @OneToMany(mappedBy = "userAccount",cascade = {CascadeType.ALL}, orphanRemoval = true)
-    private List<Lead> leads;
 
     //Costruttori
     public UserAccount() {}
@@ -59,11 +57,5 @@ public class UserAccount {
     }
     public void setPassword(String password) {
         this.password = password;
-    }
-    public List<Lead> getLeads() {
-        return leads;
-    }
-    public void setLeads(List<Lead> leads) {
-        this.leads = leads;
     }
 }

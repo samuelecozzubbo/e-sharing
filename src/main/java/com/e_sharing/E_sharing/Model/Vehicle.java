@@ -25,9 +25,6 @@ public class Vehicle {
     @JoinColumn(name = "site_id", referencedColumnName = "id")
     private Site site;
 
-    //Relazione con leadVehicle
-    @OneToMany(mappedBy = "vehicle")
-    private List<LeadVehicle> leadVehicles;
 
     //Costruttori
     public Vehicle() {}
