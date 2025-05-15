@@ -16,8 +16,8 @@ public class Lead {
     private int sconto;
 
     //Relazioni con utente
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "email")
+    @ManyToOne
+    @JoinColumn(name = "user_account_email", referencedColumnName = "email")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount userAccount;
     //Relazioni con pivot
