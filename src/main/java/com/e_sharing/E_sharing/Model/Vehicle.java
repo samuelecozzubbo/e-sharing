@@ -1,8 +1,12 @@
 package com.e_sharing.E_sharing.Model;
 import com.e_sharing.E_sharing.Enum.VehicleType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.validator.constraints.UniqueElements;
+
+import java.util.List;
 
 @Entity
 @Table(name = "vehicle")
@@ -15,10 +19,15 @@ public class Vehicle {
     private Double costoNoleggio;
     private Double livelloBatteria;
 
+    //Relazione con site
     @ManyToOne(cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "Site_id")
+    @JoinColumn(name = "site_id", referencedColumnName = "id")
     private Site site;
+
+    //Relazione con leadVehicle
+    @OneToMany(mappedBy = "vehicle")
+    private List<LeadVehicle> leadVehicles;
 
     //Costruttori
     public Vehicle() {}

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "lead")
@@ -20,7 +21,10 @@ public class Lead {
     @JoinColumn(name = "user_account_email", referencedColumnName = "email")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserAccount userAccount;
-    //Relazioni con pivot
+
+    //Relazioni con LeadVehicle
+    @OneToMany(mappedBy = "lead")
+    private List<LeadVehicle> leadVehicles;
 
     //Costruttori
     public Lead() {}
