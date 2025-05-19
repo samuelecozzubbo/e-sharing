@@ -1,6 +1,7 @@
 package com.e_sharing.E_sharing;
 
 import com.e_sharing.E_sharing.Model.UserAccount;
+import com.e_sharing.E_sharing.Service.GenericUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,6 +10,7 @@ public class ESharingApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ESharingApplication.class, args);
+
 	}
 
 }

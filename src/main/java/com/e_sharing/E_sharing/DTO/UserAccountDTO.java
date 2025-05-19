@@ -1,5 +1,8 @@
 package com.e_sharing.E_sharing.DTO;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserAccountDTO {
     private String email;
     private String nome;
@@ -56,4 +59,5 @@ public class UserAccountDTO {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }

@@ -1,40 +1,54 @@
 package com.e_sharing.E_sharing.Service;
 
-import com.e_sharing.E_sharing.Config.ModelMapperConfig;
 import com.e_sharing.E_sharing.DTO.UserAccountDTO;
-import com.e_sharing.E_sharing.Mapper.UserAccountMapper;
 import com.e_sharing.E_sharing.Model.UserAccount;
 import com.e_sharing.E_sharing.Repositories.UserAccountRepository;
 import jakarta.transaction.Transactional;
-import org.apache.catalina.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserAccountService {
     //Injection della repository
     private final UserAccountRepository userAccountRepository;
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+    private final GenericUtils genericUtils;
 
     @Autowired
-    public UserAccountService(UserAccountRepository UserAccountRepository, ModelMapper modelMapper) {
+    public UserAccountService(UserAccountRepository UserAccountRepository, ModelMapper modelMapper, GenericUtils genericUtils) {
         this.userAccountRepository = UserAccountRepository;
         this.modelMapper = modelMapper;
+        this.genericUtils = genericUtils;
     }
 
     //Metodo per ottenere tutti gli utenti
-    public List<UserAccount> getAllUserAccounts() {
-        return (List<UserAccount>) userAccountRepository.findAll();
+    /*public List<UserAccountDTO> getAllUserAccounts() {
+        List<UserAccount> utenti = GenericUtils.iterableToList(userAccountRepository.findAll());
+        return utenti.stream()
+                .map(utente -> modelMapper.map(utente, UserAccountDTO.class))
+                .toList();
+    }*/
+
+    //Metodo per ottenere tutti gli utenti 2.0 con conversione
+    public List<UserAccountDTO> getAllUserAccountsAuto() {
+        Iterable<UserAccount> utenti = userAccountRepository.findAll();
+        // Uso il metodo d'istanza tramite l'istanza iniettata
+        return genericUtils.iterableToListAndDTO(utenti, UserAccountDTO.class);
     }
 
     //Metodo per ottenere un utente specifico
-    public Optional<UserAccount> findUserByEmail(String email) {
-        return userAccountRepository.findById(email);
+    public Optional<UserAccountDTO> findUserByEmail(String email) {
+        return userAccountRepository.findById(email)
+                .map(utente -> modelMapper.map(utente, UserAccountDTO.class));
     }
+
 
     //Salva un utente controllando che non sia gia presente
     public UserAccount saveUserAccount(UserAccountDTO user) {
@@ -50,16 +64,16 @@ public class UserAccountService {
     }
 
 
-    public UserAccount updateUserInfo(String email, UserAccount user) {
+    // ✅ Aggiorna nome/cognome utente
+    public UserAccountDTO updateUserInfo(String email, UserAccountDTO userDTO) {
         return userAccountRepository.findById(email)
-                .map(UTENTE -> {
-                    UTENTE.setNome(user.getNome());
-                    UTENTE.setCognome(user.getCognome());
-                    return userAccountRepository.save(UTENTE);
+                .map(user -> {
+                    user.setNome(userDTO.getNome());
+                    user.setCognome(userDTO.getCognome());
+                    return modelMapper.map(userAccountRepository.save(user), UserAccountDTO.class);
                 })
                 .orElseThrow(() -> new RuntimeException("Utente non trovato con email: " + email));
     }
-
 
     //Transazioni per modificare le informazioni di un utente
     @Transactional
@@ -98,6 +112,17 @@ public class UserAccountService {
     }
 
     @Transactional
+    public String aggiornaUsernameUtenteStream(String email, String nuovoUsername) {
+        return userAccountRepository.findById(email)
+                .map(user -> {
+                    user.setUsername(nuovoUsername);
+                    userAccountRepository.save(user);
+                    return "Username aggiornato con successo.";
+                })
+                .orElse("Utente non trovato.");
+    }
+
+    @Transactional
     public String aggiornaPasswordUtente(String email, String nuovaPassword) {
         Optional<UserAccount> utenteEsistente = userAccountRepository.findById(email);
         if (utenteEsistente.isPresent()) {
@@ -109,6 +134,20 @@ public class UserAccountService {
             return "Utente non trovato.";
         }
     }
+
+    //LOGIN
+    public boolean login(String email, String password) {
+        return userAccountRepository.findById(email)
+                .map(user -> user.getPassword().equals(password))
+                .orElse(false);
+    }
+
+    //Cancella tutti gli utenti
+    public void deleteAllUsers() {
+        userAccountRepository.deleteAll();
+    }
+
+
 
 
 }
