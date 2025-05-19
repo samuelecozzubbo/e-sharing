@@ -1,62 +1,61 @@
-package com.e_sharing.E_sharing.Model;
+package com.e_sharing.E_sharing.DTO;
 
-import jakarta.persistence.*;
+import com.e_sharing.E_sharing.Model.Site;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "site")
-public class Site {
+public class SiteDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
     private String address;
     private Integer capacity;
-    private String city;
 
     //Constructor
-    public Site() {}
+    public SiteDTO() {}
 
-    public Site(String name, String address, Integer capacity , String city) {
+    public SiteDTO(String name, String address, Integer capacity) {
         this.name = name;
         this.address = address;
         this.capacity = capacity;
-        this.city = city;
     }
 
-    //Getter e Setter
+
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
+
     public String getAddress() {
         return address;
     }
+
     public void setAddress(String address) {
         this.address = address;
     }
+
     public Integer getCapacity() {
         return capacity;
     }
+
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
     }
 
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
+    public static List<SiteDTO> siteIterToList(Iterable<Site> sites) {
+        List<SiteDTO> siteDTO = new ArrayList<>();
+        return siteDTO;
     }
 }
