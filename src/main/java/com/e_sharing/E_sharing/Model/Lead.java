@@ -35,6 +35,12 @@ public class Lead {
 
     //Costruttori
     public Lead() {}
+    public Lead(LocalDate dataAcquisto, LeadState status, int sconto, UserAccount userAccount) {
+        this.dataAcquisto = dataAcquisto;
+        this.status = status;
+        this.sconto = sconto;
+        this.userAccount = userAccount;
+    }
 
     //Getter e Setter
     public Long getId() {
@@ -61,10 +67,10 @@ public class Lead {
     public void setSconto(int sconto) {
         this.sconto = sconto;
     }
-    public UserAccount getUser() {
+    public UserAccount getUserAccount() {
         return userAccount;
     }
-    public void setUser(UserAccount userAccount) {
+    public void setUserAccount(UserAccount userAccount) {
         this.userAccount = userAccount;
     }
 }

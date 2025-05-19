@@ -1,9 +1,13 @@
 package com.e_sharing.E_sharing.Service;
 
+import com.e_sharing.E_sharing.Config.ModelMapperConfig;
+import com.e_sharing.E_sharing.DTO.UserAccountDTO;
+import com.e_sharing.E_sharing.Mapper.UserAccountMapper;
 import com.e_sharing.E_sharing.Model.UserAccount;
 import com.e_sharing.E_sharing.Repositories.UserAccountRepository;
 import jakarta.transaction.Transactional;
 import org.apache.catalina.User;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +18,12 @@ import java.util.Optional;
 public class UserAccountService {
     //Injection della repository
     private final UserAccountRepository userAccountRepository;
+    private ModelMapper modelMapper;
 
     @Autowired
-    public UserAccountService(UserAccountRepository UserAccountRepository) {
+    public UserAccountService(UserAccountRepository UserAccountRepository, ModelMapper modelMapper) {
         this.userAccountRepository = UserAccountRepository;
+        this.modelMapper = modelMapper;
     }
 
     //Metodo per ottenere tutti gli utenti
@@ -31,11 +37,11 @@ public class UserAccountService {
     }
 
     //Salva un utente controllando che non sia gia presente
-    public UserAccount saveUserAccount(UserAccount user) {
+    public UserAccount saveUserAccount(UserAccountDTO user) {
         if(userAccountRepository.existsById(user.getEmail())) {
             throw new RuntimeException("Utente gia presente con email: " + user.getEmail());
         }
-        return userAccountRepository.save(user);
+        return userAccountRepository.save(modelMapper.map(user, UserAccount.class));
     }
 
     //Elimina un utente
