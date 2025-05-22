@@ -11,14 +11,17 @@ public class SiteDTO {
     private String name;
     private String address;
     private Integer capacity;
+    private String city;
+
 
     //Constructor
     public SiteDTO() {}
 
-    public SiteDTO(String name, String address, Integer capacity) {
+    public SiteDTO(String name, String address, Integer capacity , String city) {
         this.name = name;
         this.address = address;
         this.capacity = capacity;
+        this.city = city;
     }
 
 
@@ -57,5 +60,13 @@ public class SiteDTO {
     public static List<SiteDTO> siteIterToList(Iterable<Site> sites) {
         List<SiteDTO> siteDTO = new ArrayList<>();
         return siteDTO;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 }
