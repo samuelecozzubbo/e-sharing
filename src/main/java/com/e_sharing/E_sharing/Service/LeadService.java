@@ -20,12 +20,14 @@ public class LeadService {
     private final LeadRepository leadRepository;
     private final UserAccountRepository userAccountRepository;
     private final ModelMapper modelMapper;
+    private final GenericUtils genericUtils;
 
     @Autowired
-    public LeadService(LeadRepository leadRepository, UserAccountRepository userAccountRepository, ModelMapper modelMapper) {
+    public LeadService(LeadRepository leadRepository, UserAccountRepository userAccountRepository, ModelMapper modelMapper, GenericUtils genericUtils) {
         this.userAccountRepository = userAccountRepository;
         this.modelMapper = modelMapper;
         this.leadRepository = leadRepository;
+        this.genericUtils = genericUtils;
     }
 
     // Metodi per gestire i lead
@@ -36,6 +38,12 @@ public class LeadService {
         leadRepository.findAll().forEach(lead -> DTOList.add(modelMapper.map(lead, LeadDTO.class)));
         return DTOList;
     }
+
+    //Recupera tutti i lead con metodo generico
+    public List<LeadDTO> getAllLeadsGeneric() {
+        return genericUtils.iterableToListAndDTO(leadRepository.findAll(), LeadDTO.class);
+    }
+
     // Recupera un lead per id
     public Optional<LeadDTO> getLeadById(Long id) {
         return leadRepository.findById(id)
@@ -59,6 +67,11 @@ public class LeadService {
     // Elimina un lead dato l'id
     public void deleteLead(Long id) {
         leadRepository.deleteById(id);
+    }
+
+    //Elimina tutti i lead
+    public void deleteAllLeads() {
+        leadRepository.deleteAll();
     }
 
     // Aggiorna un lead

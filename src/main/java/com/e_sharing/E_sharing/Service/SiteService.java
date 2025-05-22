@@ -24,9 +24,9 @@ public class SiteService {
     }
 
     //get all
-    public List<SiteDTO> getAllSite(){
+    /*public List<SiteDTO> getAllSite(){
         return ; //siteRepository.findAll();}
-    }
+    }*/
 
     //get by id
     public Optional<Site> getSiteById (Long id){return siteRepository.findById(id);}

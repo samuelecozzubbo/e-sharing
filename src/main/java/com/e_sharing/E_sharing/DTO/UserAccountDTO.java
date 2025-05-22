@@ -60,4 +60,13 @@ public class UserAccountDTO {
         this.password = password;
     }
 
+    //Stampa dettagli
+    @Override
+    public String toString() {
+        return "email='" + email + '\'' +
+                ", nome='" + nome + '\'' +
+                ", cognome='" + cognome + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'';
+    }
 }
