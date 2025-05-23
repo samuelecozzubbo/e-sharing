@@ -1,6 +1,6 @@
 package com.e_sharing.E_sharing.Service;
 
-import com.e_sharing.E_sharing.DTO.LeadDTO;
+
 import com.e_sharing.E_sharing.DTO.SiteDTO;
 import com.e_sharing.E_sharing.Model.Site;
 import com.e_sharing.E_sharing.Repositories.SiteRepository;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,19 +18,21 @@ public class SiteService {
 
     private final SiteRepository siteRepository;
     private final ModelMapper modelMapper;
+    private final GenericUtils genericUtils;
 
     @Autowired
-    public SiteService(SiteRepository siteRepository , ModelMapper modelMapper){
+    public SiteService(SiteRepository siteRepository , ModelMapper modelMapper , GenericUtils genericUtils){
         this.siteRepository = siteRepository;
         this.modelMapper = modelMapper;
+        this.genericUtils = genericUtils;
     }
 
-    //get all
+
+    //get all con generic utils
     public List<SiteDTO> getAllSite(){
-        List<SiteDTO> sitesDTO = new ArrayList<>();
-        siteRepository.findAll().forEach(site -> sitesDTO.add(modelMapper.map(site, SiteDTO.class)));
-        return sitesDTO; //siteRepository.findAll();}
+        return genericUtils.iterableToListAndDTO(siteRepository.findAll(), SiteDTO.class);
     }
+
 
     //get by id
     public Optional<SiteDTO> getSiteById (Long id){
@@ -51,19 +52,16 @@ public class SiteService {
 
     //update info
     @Transactional
-    public String result(Long id ,SiteDTO site){
-        if (siteRepository.existsById(id)){
-            siteRepository.findById(id).map(existingSite -> {
-                existingSite.setName(site.getName());
-                existingSite.setAddress(site.getAddress());
-                existingSite.setCity(site.getCity());
-                return siteRepository.save(existingSite);
-            });
-            return "Site updated";
-            }
-        else {
-            return "Site not found";
-        }
+    public SiteDTO updateSite(Long id ,SiteDTO site){
+        return siteRepository.findById(id).map(siteToUpdate -> {
+            siteToUpdate.setAddress(site.getAddress());
+            siteToUpdate.setCapacity(site.getCapacity());
+            siteToUpdate.setCity(site.getCity());
+            siteToUpdate.setName(site.getName());
+
+            Site updatedSite = siteRepository.save(siteToUpdate);
+            return modelMapper.map(updatedSite, SiteDTO.class);
+        }).orElseThrow(() -> new RuntimeException("Site non trovato con id: " + id));
     }
 
 }
