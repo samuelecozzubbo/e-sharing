@@ -1,8 +1,8 @@
 package com.e_sharing.E_sharing.Enum;
 
 public enum LeadState {
-    RENTED(1, "Rented"),
-    CANCELLED(2, "Cancelled");
+    RENTED(0, "Rented"),
+    CANCELLED(1, "Cancelled");
 
     private int id;
     private String name;
