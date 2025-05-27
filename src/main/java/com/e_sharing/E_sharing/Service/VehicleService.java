@@ -40,4 +40,8 @@ public class VehicleService {
         vehicleRepository.deleteById(id);
     }
 
+    public void deleteAllVehicle(){
+        vehicleRepository.deleteAll();
+    }
+
 }
