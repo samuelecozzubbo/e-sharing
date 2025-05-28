@@ -1,7 +1,9 @@
 package com.e_sharing.E_sharing.Service;
 
 import com.e_sharing.E_sharing.DTO.UserAccountDTO;
+import com.e_sharing.E_sharing.Model.Lead;
 import com.e_sharing.E_sharing.Model.UserAccount;
+import com.e_sharing.E_sharing.Repositories.LeadRepository;
 import com.e_sharing.E_sharing.Repositories.UserAccountRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -9,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserAccountService {
@@ -20,12 +20,16 @@ public class UserAccountService {
     private final UserAccountRepository userAccountRepository;
     private final ModelMapper modelMapper;
     private final GenericUtils genericUtils;
+    private final LeadRepository leadRepository;
+    private final UsernameUpdateService usernameUpdateService;
 
     @Autowired
-    public UserAccountService(UserAccountRepository UserAccountRepository, ModelMapper modelMapper, GenericUtils genericUtils) {
+    public UserAccountService(UserAccountRepository UserAccountRepository, ModelMapper modelMapper, GenericUtils genericUtils, LeadRepository leadRepository, UsernameUpdateService usernameUpdateService) {
         this.userAccountRepository = UserAccountRepository;
         this.modelMapper = modelMapper;
         this.genericUtils = genericUtils;
+        this.leadRepository = leadRepository;
+        this.usernameUpdateService = usernameUpdateService;
     }
 
     //Metodo per ottenere tutti gli utenti
@@ -78,37 +82,55 @@ public class UserAccountService {
     //Transazioni per modificare le informazioni di un utente
     @Transactional
     public String aggiornaEmailUtente(String vecchiaEmail, String nuovaEmail) {
-        Optional<UserAccount> utenteEsistente = userAccountRepository.findById(vecchiaEmail);
-        if (utenteEsistente.isPresent()) {
-            UserAccount utente = utenteEsistente.get();
-            // 1. Verifica se la nuova email è già in uso
-            if (userAccountRepository.existsById(nuovaEmail)) {
-                return "La nuova email è già in uso.";
-            }
-            // 2. Aggiorna l'email dell'utente
-            utente.setEmail(nuovaEmail);
-            userAccountRepository.save(utente);
-            // 3. Se ci fossero altre tabelle con l'email come chiave esterna,
-            // dovresti aggiornare anche quelle qui dentro la stessa transazione.
-            // Ad esempio, se 'Lead' avesse 'Utente_email' come FK:
-            // leadRepository.updateUtenteEmail(vecchiaEmail, nuovaEmail);
-            return "Email aggiornata con successo.";
-        } else {
-            return "Utente con la vecchia email non trovato.";
+        if (userAccountRepository.existsById(nuovaEmail)) {
+            return "La nuova email è già in uso.";
         }
-    }
 
-    @Transactional
-    public String aggiornaUsernameUtente(String email, String nuovoUsername) {
-        Optional<UserAccount> utenteEsistente = userAccountRepository.findById(email);
-        if (utenteEsistente.isPresent()) {
-            UserAccount utente = utenteEsistente.get();
-            utente.setUsername(nuovoUsername);
-            userAccountRepository.save(utente);
-            return "Username aggiornato con successo.";
-        } else {
+        Optional<UserAccount> utenteOpt = userAccountRepository.findById(vecchiaEmail);
+        if (utenteOpt.isEmpty()) {
             return "Utente non trovato.";
         }
+
+        UserAccount utenteVecchio = utenteOpt.get();
+        List<Lead> vecchiLead = new ArrayList<>(utenteVecchio.getLeads());
+
+        // Disattivo lo username per evitare vincoli unique
+        usernameUpdateService.disattivaUsername(vecchiaEmail, "deleted_" + utenteVecchio.getUsername());
+
+        // Elimino l'utente → eliminerà anche i lead in cascade
+        userAccountRepository.deleteById(vecchiaEmail);
+
+        // Creo il nuovo utente con la nuova email
+        UserAccount nuovoUtente = new UserAccount(
+                nuovaEmail,
+                utenteVecchio.getNome(),
+                utenteVecchio.getCognome(),
+                utenteVecchio.getUsername(),
+                utenteVecchio.getPassword()
+        );
+        UserAccount nuovoUtenteSalvato = userAccountRepository.save(nuovoUtente);
+
+        // Ricreo i lead e li assegno al nuovo utente
+        for (Lead vecchioLead : vecchiLead) {
+            Lead nuovoLead = new Lead(
+                    vecchioLead.getDataAcquisto(),
+                    vecchioLead.getStatus(),
+                    vecchioLead.getSconto(),
+                    nuovoUtenteSalvato
+            );
+            leadRepository.save(nuovoLead);
+        }
+
+        return "Email aggiornata e lead ricreati con successo!";
+    }
+
+
+    @Transactional
+    public void disattivaUsername(String email, String nuovoUsername) {
+        userAccountRepository.findById(email).ifPresent(user -> {
+            user.setUsername(nuovoUsername);
+            userAccountRepository.save(user);
+        });
     }
 
     @Transactional

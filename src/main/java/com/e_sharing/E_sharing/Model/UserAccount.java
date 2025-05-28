@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,7 +27,7 @@ public class UserAccount {
     private String cognome;
 
     @NotBlank(message = "Lo username è obbligatorio")
-    @Size(min = 3, max = 30)
+    @Size(min = 3, max = 50)
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -34,8 +35,8 @@ public class UserAccount {
     @Column(nullable = false)
     private String password;
 
-    //Relazione con tabella lead
-    // Relazione con la tabella pivot (Table)
+    @OneToMany(mappedBy = "userAccount", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Lead> leads = new ArrayList<>();
 
     //Costruttori
     public UserAccount() {}
@@ -77,5 +78,11 @@ public class UserAccount {
     }
     public void setPassword(String password) {
         this.password = password;
+    }
+    public List<Lead> getLeads() {
+        return leads;
+    }
+    public void setLeads(List<Lead> leads) {
+        this.leads = leads;
     }
 }

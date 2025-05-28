@@ -36,23 +36,23 @@ public class UserAccountController {
         userAccountService.deleteUserAccount(email);
     }
 
-    @PutMapping("/update/noemcognome/{email}")
+    @PutMapping("/update/nomecognome/{email}")
     public UserAccountDTO updateNomeCognome(@PathVariable String email, @RequestBody UserAccountDTO user){
         return userAccountService.updateUserInfo(email, user);
     }
 
     @PutMapping("update/email/{email}")
-    public String upddateEmail(@PathVariable String email, @RequestBody String nuovaEmail){
+    public String updateEmail(@PathVariable String email, @RequestBody String nuovaEmail){
         return userAccountService.aggiornaEmailUtente(email, nuovaEmail);
     }
 
     @PutMapping("update/username/{email}")
-    public String upddateUsername(@PathVariable String email, @RequestBody String nuovoUsername){
+    public String updateUsername(@PathVariable String email, @RequestBody String nuovoUsername){
         return userAccountService.aggiornaUsernameUtenteStream(email, nuovoUsername);
     }
 
     @PutMapping("update/password/{email}")
-    public String upddatePassword(@PathVariable String email, @RequestBody String nuovaPassword){
+    public String updatePassword(@PathVariable String email, @RequestBody String nuovaPassword){
         return userAccountService.aggiornaPasswordUtente(email, nuovaPassword);
     }
 
