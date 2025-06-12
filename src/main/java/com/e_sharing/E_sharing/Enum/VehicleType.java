@@ -1,25 +1,17 @@
 package com.e_sharing.E_sharing.Enum;
 
+/**
+ * Enum per rappresentare il tipo di veicolo.
+ * <p>
+ * I possibili tipi sono:
+ * <ul>
+ *     <li>{@link #MONOPATTINO} – monopattino elettrico</li>
+ *     <li>{@link #BICICLETTA} – bicicletta</li>
+ *     <li>{@link #SKATEBOARD} – skateboard</li>
+ * </ul>
+ */
 public enum VehicleType {
-
-    MONOPATTINO(1L , "Monopattino"),
-    BICICLETTA(2L , "Bicicletta"),
-    SKATEBOARD(3L , "Skateboard");
-
-
-    private final Long id;
-    private final String tipoVeicolo;
-
-    VehicleType(Long id, String tipoVeicolo) {
-        this.id = id;
-        this.tipoVeicolo = tipoVeicolo;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getTipoVeicolo() {
-        return tipoVeicolo;
-    }
+    MONOPATTINO,
+    BICICLETTA,
+    SKATEBOARD
 }

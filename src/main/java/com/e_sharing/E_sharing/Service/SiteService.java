@@ -1,6 +1,5 @@
 package com.e_sharing.E_sharing.Service;
 
-
 import com.e_sharing.E_sharing.DTO.SiteDTO;
 import com.e_sharing.E_sharing.Model.Site;
 import com.e_sharing.E_sharing.Repositories.SiteRepository;
@@ -9,10 +8,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service per la gestione delle operazioni sui Site.
+ */
 @Service
 public class SiteService {
 
@@ -21,38 +22,56 @@ public class SiteService {
     private final GenericUtils genericUtils;
 
     @Autowired
-    public SiteService(SiteRepository siteRepository , ModelMapper modelMapper , GenericUtils genericUtils){
+    public SiteService(SiteRepository siteRepository, ModelMapper modelMapper, GenericUtils genericUtils) {
         this.siteRepository = siteRepository;
         this.modelMapper = modelMapper;
         this.genericUtils = genericUtils;
     }
 
-
-    //get all con generic utils
-    public List<SiteDTO> getAllSite(){
+    /**
+     * Restituisce tutti i Site come lista di SiteDTO.
+     */
+    public List<SiteDTO> getAllSite() {
         return genericUtils.iterableToListAndDTO(siteRepository.findAll(), SiteDTO.class);
     }
 
-
-    //get by id
-    public Optional<SiteDTO> getSiteById (Long id){
+    /**
+     * Restituisce un SiteDTO a partire dall'id, se esiste.
+     */
+    public Optional<SiteDTO> getSiteById(Long id) {
         return siteRepository.findById(id).map(site -> modelMapper.map(site, SiteDTO.class));
     }
 
-    //salva un nuovo site controllando che non sia gia presente
+    /**
+     * Salva un nuovo Site nel database.
+     * @param site SiteDTO da salvare
+     * @return messaggio di esito
+     */
     @Transactional
-    public String saveSite(SiteDTO site){
+    public String saveSite(SiteDTO site) {
         Site newSite = modelMapper.map(site, Site.class);
         siteRepository.save(newSite);
         return "Site saved";
     }
 
-    //delete by Id
-    public void deleteSite(Long id){siteRepository.deleteById(id);}
+    /**
+     * Elimina un Site dato l'id.
+     * @param id id del sito da eliminare
+     * @return messaggio di esito
+     */
+    public String deleteSite(Long id) {
+        siteRepository.deleteById(id);
+        return "Site eliminato con id: " + id;
+    }
 
-    //update info
+    /**
+     * Aggiorna le informazioni di un Site esistente.
+     * @param id id del sito da aggiornare
+     * @param site nuovo oggetto SiteDTO con i dati aggiornati
+     * @return SiteDTO aggiornato
+     */
     @Transactional
-    public SiteDTO updateSite(Long id ,SiteDTO site){
+    public SiteDTO updateSite(Long id, SiteDTO site) {
         return siteRepository.findById(id).map(siteToUpdate -> {
             siteToUpdate.setAddress(site.getAddress());
             siteToUpdate.setCapacity(site.getCapacity());
@@ -63,5 +82,4 @@ public class SiteService {
             return modelMapper.map(updatedSite, SiteDTO.class);
         }).orElseThrow(() -> new RuntimeException("Site non trovato con id: " + id));
     }
-
 }

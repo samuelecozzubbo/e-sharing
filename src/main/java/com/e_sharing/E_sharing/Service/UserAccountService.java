@@ -1,9 +1,14 @@
 package com.e_sharing.E_sharing.Service;
 
+import com.e_sharing.E_sharing.DTO.StoricoNoleggioDTO;
 import com.e_sharing.E_sharing.DTO.UserAccountDTO;
+import com.e_sharing.E_sharing.DTO.VehicleDTO;
+import com.e_sharing.E_sharing.Enum.LeadState;
 import com.e_sharing.E_sharing.Model.Lead;
+import com.e_sharing.E_sharing.Model.LeadVehicle;
 import com.e_sharing.E_sharing.Model.UserAccount;
 import com.e_sharing.E_sharing.Repositories.LeadRepository;
+import com.e_sharing.E_sharing.Repositories.LeadVehicleRepository;
 import com.e_sharing.E_sharing.Repositories.UserAccountRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -13,62 +18,73 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+/**
+ * Service per la gestione delle operazioni sugli account utente.
+ */
 @Service
 public class UserAccountService {
-    //Injection della repository
     private final UserAccountRepository userAccountRepository;
     private final ModelMapper modelMapper;
     private final GenericUtils genericUtils;
     private final LeadRepository leadRepository;
     private final UsernameUpdateService usernameUpdateService;
+    private final LeadVehicleRepository leadVehicleRepository;
 
     @Autowired
-    public UserAccountService(UserAccountRepository UserAccountRepository, ModelMapper modelMapper, GenericUtils genericUtils, LeadRepository leadRepository, UsernameUpdateService usernameUpdateService) {
-        this.userAccountRepository = UserAccountRepository;
+    public UserAccountService(
+            UserAccountRepository userAccountRepository,
+            ModelMapper modelMapper,
+            GenericUtils genericUtils,
+            LeadRepository leadRepository,
+            UsernameUpdateService usernameUpdateService,
+            LeadVehicleRepository leadVehicleRepository
+    ) {
+        this.userAccountRepository = userAccountRepository;
         this.modelMapper = modelMapper;
         this.genericUtils = genericUtils;
         this.leadRepository = leadRepository;
         this.usernameUpdateService = usernameUpdateService;
+        this.leadVehicleRepository = leadVehicleRepository;
     }
 
-    //Metodo per ottenere tutti gli utenti
-    /*public List<UserAccountDTO> getAllUserAccounts() {
-        List<UserAccount> utenti = GenericUtils.iterableToList(userAccountRepository.findAll());
-        return utenti.stream()
-                .map(utente -> modelMapper.map(utente, UserAccountDTO.class))
-                .toList();
-    }*/
-
-    //Metodo per ottenere tutti gli utenti 2.0 con conversione
+    /**
+     * Ottiene la lista di tutti gli utenti (UserAccountDTO).
+     */
     public List<UserAccountDTO> getAllUserAccountsAuto() {
         Iterable<UserAccount> utenti = userAccountRepository.findAll();
-        // Uso il metodo d'istanza tramite l'istanza iniettata
         return genericUtils.iterableToListAndDTO(utenti, UserAccountDTO.class);
     }
 
-    //Metodo per ottenere un utente specifico
+    /**
+     * Ricerca un utente tramite email e lo restituisce come DTO.
+     */
     public Optional<UserAccountDTO> findUserByEmail(String email) {
         return userAccountRepository.findById(email)
                 .map(utente -> modelMapper.map(utente, UserAccountDTO.class));
     }
 
-
-    //Salva un utente controllando che non sia gia presente
+    /**
+     * Salva un nuovo utente controllando che non sia già presente.
+     */
     public UserAccount saveUserAccount(UserAccountDTO user) {
-        if(userAccountRepository.existsById(user.getEmail())) {
+        if (userAccountRepository.existsById(user.getEmail())) {
             throw new RuntimeException("Utente gia presente con email: " + user.getEmail());
         }
         return userAccountRepository.save(modelMapper.map(user, UserAccount.class));
     }
 
-    //Elimina un utente
+    /**
+     * Elimina un utente tramite email.
+     */
     public void deleteUserAccount(String email) {
         userAccountRepository.deleteById(email);
     }
 
-
-    // ✅ Aggiorna nome/cognome utente
+    /**
+     * Aggiorna nome e cognome di un utente.
+     */
     public UserAccountDTO updateUserInfo(String email, UserAccountDTO userDTO) {
         return userAccountRepository.findById(email)
                 .map(user -> {
@@ -79,7 +95,9 @@ public class UserAccountService {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato con email: " + email));
     }
 
-    //Transazioni per modificare le informazioni di un utente
+    /**
+     * Transazione per modificare l'email di un utente e ricreare i lead associati.
+     */
     @Transactional
     public String aggiornaEmailUtente(String vecchiaEmail, String nuovaEmail) {
         if (userAccountRepository.existsById(nuovaEmail)) {
@@ -94,13 +112,10 @@ public class UserAccountService {
         UserAccount utenteVecchio = utenteOpt.get();
         List<Lead> vecchiLead = new ArrayList<>(utenteVecchio.getLeads());
 
-        // Disattivo lo username per evitare vincoli unique
         usernameUpdateService.disattivaUsername(vecchiaEmail, "deleted_" + utenteVecchio.getUsername());
 
-        // Elimino l'utente → eliminerà anche i lead in cascade
         userAccountRepository.deleteById(vecchiaEmail);
 
-        // Creo il nuovo utente con la nuova email
         UserAccount nuovoUtente = new UserAccount(
                 nuovaEmail,
                 utenteVecchio.getNome(),
@@ -110,7 +125,7 @@ public class UserAccountService {
         );
         UserAccount nuovoUtenteSalvato = userAccountRepository.save(nuovoUtente);
 
-        // Ricreo i lead e li assegno al nuovo utente
+        // Ricrea i lead associati al nuovo utente
         for (Lead vecchioLead : vecchiLead) {
             Lead nuovoLead = new Lead(
                     vecchioLead.getDataAcquisto(),
@@ -124,15 +139,9 @@ public class UserAccountService {
         return "Email aggiornata e lead ricreati con successo!";
     }
 
-
-    @Transactional
-    public void disattivaUsername(String email, String nuovoUsername) {
-        userAccountRepository.findById(email).ifPresent(user -> {
-            user.setUsername(nuovoUsername);
-            userAccountRepository.save(user);
-        });
-    }
-
+    /**
+     * Aggiorna l'username di un utente.
+     */
     @Transactional
     public String aggiornaUsernameUtenteStream(String email, String nuovoUsername) {
         return userAccountRepository.findById(email)
@@ -144,6 +153,9 @@ public class UserAccountService {
                 .orElse("Utente non trovato.");
     }
 
+    /**
+     * Aggiorna la password di un utente.
+     */
     @Transactional
     public String aggiornaPasswordUtente(String email, String nuovaPassword) {
         Optional<UserAccount> utenteEsistente = userAccountRepository.findById(email);
@@ -157,19 +169,39 @@ public class UserAccountService {
         }
     }
 
-    //LOGIN
-    public boolean login(String email, String password) {
-        return userAccountRepository.findById(email)
-                .map(user -> user.getPassword().equals(password))
-                .orElse(false);
-    }
-
-    //Cancella tutti gli utenti
+    /**
+     * Elimina tutti gli utenti.
+     */
     public void deleteAllUsers() {
         userAccountRepository.deleteAll();
     }
 
+    /**
+     * Restituisce lo storico dei noleggi per un utente.
+     */
+    public List<StoricoNoleggioDTO> getStoricoNoleggiUtente(String email) {
+        List<LeadVehicle> leadVehicles = leadVehicleRepository.findAllByLead_UserAccount_Email(email);
 
-
-
+        return leadVehicles.stream()
+                .map(lv -> {
+                    var v = lv.getVehicle();
+                    VehicleDTO vehicleDTO = new VehicleDTO(
+                            v.getId(),
+                            v.getVehicleType(),
+                            v.getCostoNoleggio(),
+                            v.getLivelloBatteria(),
+                            v.getState(),
+                            v.getSite() != null ? v.getSite().getId() : null
+                    );
+                    LeadState status = lv.getLead().getStatus();
+                    return new StoricoNoleggioDTO(
+                            vehicleDTO,
+                            lv.getDataNoleggio(),
+                            lv.getDurataNoleggioGiorni(),
+                            lv.getTotale(),
+                            status
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 }
